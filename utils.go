@@ -1,15 +1,15 @@
 package main
 
-func (cm commandMap) getKeys() []string {
+func (cm CommandMap) getKeys() []string {
 	keys := []string{}
-	for key, _ := range cm {
+	for key := range cm {
 		keys = append(keys, key)
 	}
 	return keys
 }
 
-func (cm commandMap) getValues() []command {
-	values := []command{}
+func (cm CommandMap) getValues() []Command {
+	values := []Command{}
 	for _, value := range cm {
 		values = append(values, value)
 	}

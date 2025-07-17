@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	// "fmt"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
@@ -24,33 +24,30 @@ const logo = `
                      \/     \/     \/
 `
 
-type model struct {
+type Model struct {
 	state State
-	commands []string
-	cursor int
-	selected map[int]struct{}
-	textInput  textinput.Model
+	commands CommandMap
+	text_input  textinput.Model
+	command_return_text string
 }
 
-func initialModel() model {
+func initialModel() Model {
 	ti := textinput.New()
-	ti.Placeholder = "help"
 	ti.Width = 20
 	ti.Focus()
 
-	return model{
+	return Model{
 		state: Initial,
-		commands: getCommands().getKeys(),
-		selected: make(map[int]struct{}),
-		textInput: ti,
+		commands: getCommands(),
+		text_input: ti,
 	}
 }
 
-func (m model) Init() tea.Cmd {
+func (m Model) Init() tea.Cmd {
 	return nil
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch m.state {
@@ -66,32 +63,17 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case tea.KeyEscape, tea.KeyCtrlC:
 				cmd = tea.Quit
 			case tea.KeyEnter:
-				m.state = Running
+				cmd = sendCommandMsg(m.text_input.Value())
+				m.text_input.SetValue("")
 			default:
-				m.textInput, cmd = m.textInput.Update(msg)
+				m.text_input, cmd = m.text_input.Update(msg)
 			}
-		}
-	case Running:
-		switch msg := msg.(type) {
-		case tea.KeyMsg:
-			switch msg.String() {
-			case "ctrl+c", "q":
-				cmd = tea.Quit
-			case "up", "k":
-				if m.cursor > 0 {
-					m.cursor--
-				}
-			case "down", "j":
-				if m.cursor < len(m.commands) - 1 {
-					m.cursor++
-				}
-			case "enter", " ":
-				_, ok := m.selected[m.cursor]
-				if ok {
-					delete(m.selected, m.cursor)
-				} else {
-					m.selected[m.cursor] = struct{}{}
-				}
+		case CommandMsg:
+			command, ok := m.commands[string(msg)]
+			if !ok {
+				m.command_return_text = "Invalid command\n"
+			} else {
+				m.command_return_text = command.callback(&m)
 			}
 		}
 	}
@@ -99,7 +81,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m model) View() string {
+func (m Model) View() string {
 	s := ""
 	switch m.state {
 	case Initial:
@@ -107,22 +89,12 @@ func (m model) View() string {
 		s += "\n\n"
 		s += "Press any key to continue..."
 	case Accepting:
-		s += "What would you like to do?\n"
-		s += m.textInput.View()
-	case Running:
-		s += "\n\n"
-		s += "Run a command!\n\n"
-
-		for i, command := range m.commands {
-			cursor := " "
-			if m.cursor == i {
-				cursor = ">"
-			}
-
-			s += fmt.Sprintf("%s %s\n", cursor, command)
+		if m.command_return_text == "" {
+			s += "What would you like to do?\n"
+		} else {
+			s += m.command_return_text
 		}
-
-		s += "\nPress q to quit.\n"
+		s += m.text_input.View()
 	}
 
 	return s

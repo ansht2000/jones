@@ -10,10 +10,6 @@ import (
 	// "github.com/chzyer/readline"
 )
 
-type programConfig struct {
-
-}
-
 func main() {
 	// l, err := readline.NewEx(&readline.Config{
 	// 	Prompt: "> ",

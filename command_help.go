@@ -2,13 +2,11 @@ package main
 
 import "fmt"
 
-func commandHelp(cfg *programConfig, args ...string) error {
-	fmt.Println("Jones is here to help")
-	fmt.Println("Usage:")
-	fmt.Println("")
+func commandHelp(model *Model, args ...string) string {
+	s := "Usage:\n\n"
 	for _, cmd := range getCommands() {
-		fmt.Printf("%s: %s\n", cmd.name, cmd.description)
+		s += fmt.Sprintf("%s: %s\n", cmd.name, cmd.description)
 	}
-	fmt.Println("")
-	return nil
+	s += "\n"
+	return s
 }
