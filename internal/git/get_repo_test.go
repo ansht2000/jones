@@ -33,12 +33,12 @@ func TestGetRepo(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		actual_user, actual_repo, err := parseRepoName(c.repo_url)
-		if actual_user != c.expected_user {
-			log.Printf("Got incorrect user %s for repo url: %s", actual_user, c.repo_url)
+		repo_info, err := parseRepoName(c.repo_url)
+		if repo_info.user != c.expected_user {
+			log.Printf("Got incorrect user %s for repo url: %s", repo_info.user, c.repo_url)
 		}
-		if actual_repo != c.expected_repo {
-			log.Printf("Got incorrect repo name %s for repo url: %s", actual_repo, c.repo_url)
+		if repo_info.repo != c.expected_repo {
+			log.Printf("Got incorrect repo name %s for repo url: %s", repo_info.repo, c.repo_url)
 		}
 		if err != c.expected_err {
 			log.Printf("Function did not throw expected error %v, threw %v instead", c.expected_err, err)
