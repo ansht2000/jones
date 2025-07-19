@@ -10,20 +10,32 @@ type Command struct {
 
 type CommandMap map[string]Command
 
-type CommandMsg string
+type CommandMsg struct {
+	command_name string
+	command_args []string
+}
 
-func sendCommandMsg(command_name string) tea.Cmd {
+func CommandMessage(command_name string, command_args []string) CommandMsg {
+	return CommandMsg{command_name: command_name,command_args: command_args}
+}
+
+func sendCommandMsg(command_name string, command_args []string) tea.Cmd {
 	return func() tea.Msg {
-		return CommandMsg(command_name)
+		return CommandMessage(command_name, command_args)
 	}
 } 
 
 func getCommands() CommandMap {
 	return CommandMap{
-		"help":  {
+		"help": {
 			name: "help",
 			description: "Displays a help message",
 			callback: commandHelp,
+		},
+		"clone": {
+			name: "clone <repo_url>",
+			description: "Clones a git repo into the working directory",
+			callback: commandClone,
 		},
 	}
 }

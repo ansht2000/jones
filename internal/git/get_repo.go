@@ -2,14 +2,16 @@ package git
 
 import (
 	"errors"
-	"os"
 	"os/exec"
 	"strings"
 )
 
-const CLONE_COMMAND = "git clone"
+const (
+	GIT = "git"
+	CLONE = "clone"
+)
 
-var ErrInvalidRepoURL = errors.New("Invalid git repo URL")
+var ErrInvalidRepoURL = errors.New("invalid git repo URL")
 
 type GitRepoInfo struct {
 	// full repo URL
@@ -42,8 +44,13 @@ func parseRepoName(repo_url string) (GitRepoInfo, error) {
 	}
 }
 
-func GetRepo(repo_url string) exec.Cmd {
-	os.Chmod("ppop", os.ModeAppend)
-	cmd := exec.Cmd{}
-	return cmd
+func CloneRepo(repo_url string) error {
+	repo_info, err := parseRepoName(repo_url)
+	if err != nil {
+		return err
+	}
+
+	clone_cmd := exec.Command(GIT, CLONE, repo_info.repo_url)
+	clone_cmd.Run()
+	return nil
 }

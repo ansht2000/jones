@@ -33,7 +33,7 @@ type Model struct {
 
 func initialModel() Model {
 	ti := textinput.New()
-	ti.Width = 20
+	ti.Width = 100
 	ti.Focus()
 
 	return Model{
@@ -63,17 +63,18 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case tea.KeyEscape, tea.KeyCtrlC:
 				cmd = tea.Quit
 			case tea.KeyEnter:
-				cmd = sendCommandMsg(m.text_input.Value())
+				command_name, command_args := parseCommand(m.text_input.Value())
+				cmd = sendCommandMsg(command_name, command_args)
 				m.text_input.SetValue("")
 			default:
 				m.text_input, cmd = m.text_input.Update(msg)
 			}
 		case CommandMsg:
-			command, ok := m.commands[string(msg)]
+			command, ok := m.commands[msg.command_name]
 			if !ok {
 				m.command_return_text = "Invalid command\n"
 			} else {
-				m.command_return_text = command.callback(&m)
+				m.command_return_text = command.callback(&m, msg.command_args...)
 			}
 		}
 	}

@@ -1,4 +1,4 @@
-module jones
+module github.com/ansht2000/jones
 
 go 1.23.3
 

@@ -5,7 +5,7 @@ import (
 	"log"
 )
 
-func TestGetRepo(t *testing.T) {
+func TestParseRepoName(t *testing.T) {
 	cases := []struct{
 		repo_url string
 		expected_user string
