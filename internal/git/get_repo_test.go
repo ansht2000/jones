@@ -34,11 +34,11 @@ func TestParseRepoName(t *testing.T) {
 
 	for _, c := range cases {
 		repo_info, err := parseRepoName(c.repo_url)
-		if repo_info.user != c.expected_user {
-			log.Printf("Got incorrect user %s for repo url: %s", repo_info.user, c.repo_url)
+		if repo_info.user_name != c.expected_user {
+			log.Printf("Got incorrect user %s for repo url: %s", repo_info.user_name, c.repo_url)
 		}
-		if repo_info.repo != c.expected_repo {
-			log.Printf("Got incorrect repo name %s for repo url: %s", repo_info.repo, c.repo_url)
+		if repo_info.repo_name != c.expected_repo {
+			log.Printf("Got incorrect repo name %s for repo url: %s", repo_info.repo_name, c.repo_url)
 		}
 		if err != c.expected_err {
 			log.Printf("Function did not throw expected error %v, threw %v instead", c.expected_err, err)
