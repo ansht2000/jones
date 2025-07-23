@@ -2,15 +2,22 @@ package git
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
+	"sync"
 )
 
 const (
 	GIT = "git"
 	CLONE = "clone"
 )
+
+var IGNORE_LIST = map[string]struct{}{
+	".git": {},
+}
 
 var ErrInvalidRepoURL = errors.New("invalid git repo URL")
 var ErrFailedDirRead = errors.New("failed to read items in directory")
@@ -26,6 +33,7 @@ type RepoInfo struct {
 
 type RepoItem struct {
 	item_name string
+	item_path string
 	is_dir bool
 	summary string 
 	children []*RepoItem
@@ -33,8 +41,9 @@ type RepoItem struct {
 	err *string
 }
 
-func addRepoTree(repo_item *RepoItem) {
-	repo_dir_entries, err := os.ReadDir(repo_item.item_name)
+func addRepoTree(repo_item *RepoItem, repo_wg *sync.WaitGroup) {
+	// TODO: this seems brittle, find a better way to do this
+	repo_dir_entries, err := os.ReadDir(repo_item.item_path)
 	if err != nil {
 		err_string := ErrFailedDirRead.Error() + ": " + err.Error()
 		repo_item.err = &err_string
@@ -46,15 +55,21 @@ func addRepoTree(repo_item *RepoItem) {
 		if entry.IsDir() {
 			child_dir_item := RepoItem{
 				item_name: entry.Name(),
+				item_path: filepath.Join(repo_item.item_path, entry.Name()),
 				is_dir: true,
 				children: []*RepoItem{},
 				parent: repo_item,
 			}
 			repo_item.children = append(repo_item.children, &child_dir_item)
-			go addRepoTree(&child_dir_item)
+			repo_wg.Add(1)
+			go func() {
+				defer repo_wg.Done()
+				addRepoTree(&child_dir_item, repo_wg)
+			}()
 		} else {
 			child_file_item := RepoItem{
 				item_name: entry.Name(),
+				item_path: filepath.Join(repo_item.item_path, entry.Name()),
 				is_dir: false,
 				parent: repo_item,
 			}
@@ -63,15 +78,21 @@ func addRepoTree(repo_item *RepoItem) {
 	}
 }
 
-func buildRepoTree(repo_info RepoInfo) *RepoItem {
+func BuildRepoTree(repo_info RepoInfo) *RepoItem {
+	root_item_path := fmt.Sprintf("../../%s", repo_info.repo_name)
+
 	root_item := RepoItem{
 		item_name: repo_info.repo_name,
+		item_path: root_item_path,
 		is_dir: true,
 		children: []*RepoItem{},
 		parent: nil,
 	}
 
-	go addRepoTree(&root_item)
+	var repo_wg sync.WaitGroup
+	addRepoTree(&root_item, &repo_wg)
+
+	repo_wg.Wait()
 	return &root_item
 }
 
@@ -89,7 +110,7 @@ func parseRepoName(repo_url string) (RepoInfo, error) {
 	} else if strings.HasPrefix(repo_url, "git@github.com") {
 		url_parts := strings.Split(repo_url, ":")
 		url_repo_parts := strings.Split(url_parts[len(url_parts) - 1], "/")
-		repo_info.user_name = url_repo_parts[len(url_repo_parts) - 1]
+		repo_info.user_name = url_repo_parts[len(url_repo_parts) - 2]
 		repo_info.repo_name = strings.TrimRight(url_repo_parts[len(url_repo_parts) - 1], ".git")
 		return repo_info, nil
 	} else {
