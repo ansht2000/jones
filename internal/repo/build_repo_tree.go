@@ -1,0 +1,80 @@
+package repo
+
+import (
+	"errors"
+	"fmt"
+	"os"
+	"path/filepath"
+	"sync"
+)
+
+var ErrFailedDirRead = errors.New("failed to read items in directory")
+
+var IGNORE_LIST = map[string]struct{}{
+	".git": {},
+}
+
+type RepoItem struct {
+	item_name string
+	item_path string
+	is_dir bool
+	summary string 
+	children []*RepoItem
+	parent *RepoItem
+	err *string
+}
+
+func addRepoTree_r(repo_item *RepoItem, repo_wg *sync.WaitGroup) {
+	// TODO: this seems brittle, find a better way to do this
+	repo_dir_entries, err := os.ReadDir(repo_item.item_path)
+	if err != nil {
+		err_string := ErrFailedDirRead.Error() + ": " + err.Error()
+		repo_item.err = &err_string
+		return
+	}
+
+	// TODO: add an ignore list for files that are unimportant to the codebase later
+	for _, entry := range repo_dir_entries {
+		if entry.IsDir() {
+			child_dir_item := RepoItem{
+				item_name: entry.Name(),
+				item_path: filepath.Join(repo_item.item_path, entry.Name()),
+				is_dir: true,
+				children: []*RepoItem{},
+				parent: repo_item,
+			}
+			repo_item.children = append(repo_item.children, &child_dir_item)
+			repo_wg.Add(1)
+			go func() {
+				defer repo_wg.Done()
+				addRepoTree_r(&child_dir_item, repo_wg)
+			}()
+		} else {
+			child_file_item := RepoItem{
+				item_name: entry.Name(),
+				item_path: filepath.Join(repo_item.item_path, entry.Name()),
+				is_dir: false,
+				parent: repo_item,
+			}
+			repo_item.children = append(repo_item.children, &child_file_item)
+		}
+	}
+}
+
+func BuildRepoTree_r(repo_info RepoInfo) *RepoItem {
+	root_item_path := fmt.Sprintf("../../%s", repo_info.repo_name)
+
+	root_item := RepoItem{
+		item_name: repo_info.repo_name,
+		item_path: root_item_path,
+		is_dir: true,
+		children: []*RepoItem{},
+		parent: nil,
+	}
+
+	var repo_wg sync.WaitGroup
+	addRepoTree_r(&root_item, &repo_wg)
+
+	repo_wg.Wait()
+	return &root_item
+}

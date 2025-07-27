@@ -3,6 +3,7 @@ package main
 import (
 	// "fmt"
 
+	"github.com/ansht2000/jones/internal/repo"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -29,9 +30,11 @@ type Model struct {
 	commands CommandMap
 	text_input  textinput.Model
 	command_return_text string
+	repo_manager *repo.RepoManager
+	repo_list map[string]string
 }
 
-func initialModel() Model {
+func initialModel(repo_manager *repo.RepoManager) Model {
 	ti := textinput.New()
 	ti.Width = 100
 	ti.Focus()
@@ -40,6 +43,8 @@ func initialModel() Model {
 		state: Initial,
 		commands: getCommands(),
 		text_input: ti,
+		repo_manager: repo_manager,
+		repo_list: getClonedRepos(repo_manager.Root),
 	}
 }
 

@@ -1,6 +1,10 @@
 package main
 
-import "strings"
+import (
+	"os"
+	"path/filepath"
+	"strings"
+)
 
 func (cm CommandMap) getKeys() []string {
 	keys := []string{}
@@ -23,4 +27,13 @@ func parseCommand(input string) (string, []string) {
 	command := parts[0]
 	args := parts[1:]
 	return command, args
+}
+
+func getClonedRepos(repo_root string) map[string]string {
+	repo_list := make(map[string]string)
+	repos, _ :=  os.ReadDir(repo_root)
+	for _, repo := range repos {
+		repo_list[repo.Name()] = filepath.Join(repo_root, repo.Name())
+	}
+	return repo_list
 }

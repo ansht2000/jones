@@ -1,4 +1,4 @@
-package git
+package repo
 
 import (
 	"testing"
@@ -32,7 +32,7 @@ func TestParseRepoName(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		repo_info, err := parseRepoName(c.repo_url)
+		repo_info, err := newRepoInfo(c.repo_url, "")
 		if repo_info.user_name != c.expected_user {
 			t.Errorf("Got incorrect user %s for repo url: %s", repo_info.user_name, c.repo_url)
 		}
@@ -45,16 +45,16 @@ func TestParseRepoName(t *testing.T) {
 	}
 }
 
-func TestBuildRepoTree(t *testing.T) {
-	repo := BuildRepoTree(RepoInfo{
-		repo_url: "https://github.com/ansht2000/gemini-ai-chatbot.git",
-		user_name: "ansht2000",
-		repo_name: "gemini-ai-chatbot",
-	})
-	// s := "\n"
-	// for _, child := range repo.children {
-	// 	s += fmt.Sprintf("%s\n", child.item_name)
-	// }
-	// t.Errorf("%s", s)
-	t.Errorf("%v", repo.children[7].children[0].children[0])
-}
+// func TestBuildRepoTree(t *testing.T) {
+// 	repo := BuildRepoTree(RepoInfo{
+// 		repo_url: "https://github.com/ansht2000/hollywood.git",
+// 		user_name: "ansht2000",
+// 		repo_name: "hollywood",
+// 	})
+// 	// s := "\n"
+// 	// for _, child := range repo.children {
+// 	// 	s += fmt.Sprintf("%s\n", child.item_name)
+// 	// }
+// 	// t.Errorf("%s", s)
+// 	t.Errorf("%v, %d", repo, len(repo.children))
+// }
