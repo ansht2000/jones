@@ -26,7 +26,7 @@ type RepoItem struct {
 	err *string
 }
 
-func addRepoTree_r(repo_item *RepoItem, repo_wg *sync.WaitGroup) {
+func addRepoTree(repo_item *RepoItem, repo_wg *sync.WaitGroup) {
 	// TODO: this seems brittle, find a better way to do this
 	repo_dir_entries, err := os.ReadDir(repo_item.item_path)
 	if err != nil {
@@ -49,7 +49,7 @@ func addRepoTree_r(repo_item *RepoItem, repo_wg *sync.WaitGroup) {
 			repo_wg.Add(1)
 			go func() {
 				defer repo_wg.Done()
-				addRepoTree_r(&child_dir_item, repo_wg)
+				addRepoTree(&child_dir_item, repo_wg)
 			}()
 		} else {
 			child_file_item := RepoItem{
@@ -64,7 +64,7 @@ func addRepoTree_r(repo_item *RepoItem, repo_wg *sync.WaitGroup) {
 	}
 }
 
-func BuildRepoTree_r(repo_info RepoInfo) *RepoItem {
+func BuildRepoTree(repo_info RepoInfo) *RepoItem {
 	root_item_path := fmt.Sprintf("../../%s", repo_info.repo_name)
 
 	root_item := RepoItem{
@@ -76,7 +76,7 @@ func BuildRepoTree_r(repo_info RepoInfo) *RepoItem {
 	}
 
 	var repo_wg sync.WaitGroup
-	addRepoTree_r(&root_item, &repo_wg)
+	addRepoTree(&root_item, &repo_wg)
 
 	repo_wg.Wait()
 	return &root_item
