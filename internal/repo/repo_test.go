@@ -45,16 +45,16 @@ func TestParseRepoName(t *testing.T) {
 	}
 }
 
-// func TestBuildRepoTree(t *testing.T) {
-// 	repo := BuildRepoTree(RepoInfo{
-// 		repo_url: "https://github.com/ansht2000/hollywood.git",
-// 		user_name: "ansht2000",
-// 		repo_name: "hollywood",
-// 	})
-// 	// s := "\n"
-// 	// for _, child := range repo.children {
-// 	// 	s += fmt.Sprintf("%s\n", child.item_name)
-// 	// }
-// 	// t.Errorf("%s", s)
-// 	t.Errorf("%v, %d", repo, len(repo.children))
-// }
+func TestBuildRepoTree(t *testing.T) {
+	repo := BuildRepoTree(RepoInfo{
+		repo_url: "https://github.com/ansht2000/hollywood.git",
+		user_name: "ansht2000",
+		repo_name: "hollywood",
+	})
+	// s := "\n"
+	// for _, child := range repo.children {
+	// 	s += fmt.Sprintf("%s\n", child.item_name)
+	// }
+	// t.Errorf("%s", s)
+	t.Errorf("%v, %d", repo, len(repo.children))
+}

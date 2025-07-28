@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/ansht2000/jones/internal/llm"
 )
 
 
@@ -34,6 +36,7 @@ func addRepoTree(repo_item *RepoItem) {
 				item_path: filepath.Join(repo_item.item_path, entry.Name()),
 				is_dir: false,
 				parent: repo_item,
+				summary: llm.MockLLMCall(),
 			}
 			repo_item.children = append(repo_item.children, &child_file_item)
 		}

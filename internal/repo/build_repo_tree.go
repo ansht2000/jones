@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
+
+	"github.com/ansht2000/jones/internal/llm"
 )
 
 var ErrFailedDirRead = errors.New("failed to read items in directory")
@@ -55,6 +57,7 @@ func addRepoTree_r(repo_item *RepoItem, repo_wg *sync.WaitGroup) {
 				item_path: filepath.Join(repo_item.item_path, entry.Name()),
 				is_dir: false,
 				parent: repo_item,
+				summary: llm.MockLLMCall(),
 			}
 			repo_item.children = append(repo_item.children, &child_file_item)
 		}
