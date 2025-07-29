@@ -2,12 +2,9 @@ package repo
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
-
-	"github.com/ansht2000/jones/internal/llm"
 )
 
 var ErrFailedDirRead = errors.New("failed to read items in directory")
@@ -17,35 +14,36 @@ var IGNORE_LIST = map[string]struct{}{
 }
 
 type RepoItem struct {
-	item_name string
-	item_path string
-	is_dir bool
-	summary string 
-	children []*RepoItem
-	parent *RepoItem
-	err *string
+	ItemName string      `json:"item_name"`
+	ItemPath string      `json:"item_path"`
+	IsDir    bool        `json:"is_dir"`
+	Summary  string      `json:"summary"`
+	Children []*RepoItem `json:"children"`
+	Err      string      `json:"err"`
 }
 
 func addRepoTree(repo_item *RepoItem, repo_wg *sync.WaitGroup) {
 	// TODO: this seems brittle, find a better way to do this
-	repo_dir_entries, err := os.ReadDir(repo_item.item_path)
+	repo_dir_entries, err := os.ReadDir(repo_item.ItemPath)
 	if err != nil {
 		err_string := ErrFailedDirRead.Error() + ": " + err.Error()
-		repo_item.err = &err_string
+		repo_item.Err = err_string
 		return
 	}
 
 	// TODO: add an ignore list for files that are unimportant to the codebase later
 	for _, entry := range repo_dir_entries {
+		if _, ok := IGNORE_LIST[entry.Name()]; ok {
+			continue
+		}
 		if entry.IsDir() {
 			child_dir_item := RepoItem{
-				item_name: entry.Name(),
-				item_path: filepath.Join(repo_item.item_path, entry.Name()),
-				is_dir: true,
-				children: []*RepoItem{},
-				parent: repo_item,
+				ItemName: entry.Name(),
+				ItemPath: filepath.Join(repo_item.ItemPath, entry.Name()),
+				IsDir:    true,
+				Children: []*RepoItem{},
 			}
-			repo_item.children = append(repo_item.children, &child_dir_item)
+			repo_item.Children = append(repo_item.Children, &child_dir_item)
 			repo_wg.Add(1)
 			go func() {
 				defer repo_wg.Done()
@@ -53,26 +51,21 @@ func addRepoTree(repo_item *RepoItem, repo_wg *sync.WaitGroup) {
 			}()
 		} else {
 			child_file_item := RepoItem{
-				item_name: entry.Name(),
-				item_path: filepath.Join(repo_item.item_path, entry.Name()),
-				is_dir: false,
-				parent: repo_item,
-				summary: llm.MockLLMCall(),
+				ItemName: entry.Name(),
+				ItemPath: filepath.Join(repo_item.ItemPath, entry.Name()),
+				IsDir:    false,
 			}
-			repo_item.children = append(repo_item.children, &child_file_item)
+			repo_item.Children = append(repo_item.Children, &child_file_item)
 		}
 	}
 }
 
-func BuildRepoTree(repo_info RepoInfo) *RepoItem {
-	root_item_path := fmt.Sprintf("../../%s", repo_info.repo_name)
-
+func BuildRepoTree(repo_name, repo_path string) *RepoItem {
 	root_item := RepoItem{
-		item_name: repo_info.repo_name,
-		item_path: root_item_path,
-		is_dir: true,
-		children: []*RepoItem{},
-		parent: nil,
+		ItemName: repo_name,
+		ItemPath: repo_path,
+		IsDir:    true,
+		Children: []*RepoItem{},
 	}
 
 	var repo_wg sync.WaitGroup

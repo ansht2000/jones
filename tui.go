@@ -26,12 +26,12 @@ const logo = `
 `
 
 type Model struct {
-	state State
-	commands CommandMap
-	text_input  textinput.Model
+	state               State
+	commands            CommandMap
+	text_input          textinput.Model
 	command_return_text string
-	repo_manager *repo.RepoManager
-	repo_list map[string]string
+	repo_manager        *repo.RepoManager
+	repo_list           map[string]string
 }
 
 func initialModel(repo_manager *repo.RepoManager) Model {
@@ -40,11 +40,11 @@ func initialModel(repo_manager *repo.RepoManager) Model {
 	ti.Focus()
 
 	return Model{
-		state: Initial,
-		commands: getCommands(),
-		text_input: ti,
+		state:        Initial,
+		commands:     getCommands(),
+		text_input:   ti,
 		repo_manager: repo_manager,
-		repo_list: getClonedRepos(repo_manager.Root),
+		repo_list:    getClonedRepos(repo_manager.Root),
 	}
 }
 

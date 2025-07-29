@@ -20,36 +20,36 @@ type RepoInfo struct {
 var ErrInvalidRepoURL = errors.New("invalid git repo URL")
 
 func newRepoInfo(repo_url, clone_root string) (RepoInfo, error) {
-	user_name, repo_name, err := parseRepoName(repo_url)
+	user_name, repo_name, err := parseRepoNameFromURL(repo_url)
 	if err != nil {
 		return RepoInfo{}, err
 	}
-	
+
 	repo_path := filepath.Join(clone_root, repo_name)
-	
+
 	return RepoInfo{
-		repo_url: repo_url,
+		repo_url:  repo_url,
 		user_name: user_name,
 		repo_name: repo_name,
 		repo_path: repo_path,
 	}, nil
 }
 
-func parseRepoName(repo_url string) (user_name, repo_name string, err error) {
+func parseRepoNameFromURL(repo_url string) (user_name, repo_name string, err error) {
 	// check if url uses http format
 	// http format: https://github.com/{user}/{repo}.git
 	if strings.HasPrefix(repo_url, "https:") {
 		url_parts := strings.Split(repo_url, "/")
-		user_name = url_parts[len(url_parts) - 2]
-		repo_name = strings.TrimRight(url_parts[len(url_parts) - 1], ".git")
+		user_name = url_parts[len(url_parts)-2]
+		repo_name = strings.TrimRight(url_parts[len(url_parts)-1], ".git")
 		return user_name, repo_name, nil
-	// check if url uses ssh format
-	// ssh format: git@github.com:{user}/{repo}.git	
+		// check if url uses ssh format
+		// ssh format: git@github.com:{user}/{repo}.git
 	} else if strings.HasPrefix(repo_url, "git@github.com") {
 		url_parts := strings.Split(repo_url, ":")
-		url_repo_parts := strings.Split(url_parts[len(url_parts) - 1], "/")
-		user_name = url_repo_parts[len(url_repo_parts) - 2]
-		repo_name = strings.TrimRight(url_repo_parts[len(url_repo_parts) - 1], ".git")
+		url_repo_parts := strings.Split(url_parts[len(url_parts)-1], "/")
+		user_name = url_repo_parts[len(url_repo_parts)-2]
+		repo_name = strings.TrimRight(url_repo_parts[len(url_repo_parts)-1], ".git")
 		return user_name, repo_name, nil
 	} else {
 		return "", "", ErrInvalidRepoURL

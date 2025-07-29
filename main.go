@@ -9,9 +9,9 @@ import (
 	"os"
 
 	"github.com/adrg/xdg"
+	"github.com/ansht2000/jones/internal/repo"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/joho/godotenv"
-	"github.com/ansht2000/jones/internal/repo"
 	// "github.com/chzyer/readline"
 )
 

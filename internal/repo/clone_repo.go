@@ -6,12 +6,14 @@ import (
 )
 
 const (
-	GIT = "git"
+	GIT   = "git"
 	CLONE = "clone"
 )
 
 var ErrRepoAlreadyFound = errors.New("repo already cloned")
 
+// TODO: look into using go-git (https://github.com/go-git/go-git) for cloning repos instead
+// may be worth it, may not be
 func CloneRepo(repo_url string, repo_root string, repo_list map[string]string) (repo_name, repo_path string, err error) {
 	repo_info, err := newRepoInfo(repo_url, repo_root)
 	if err != nil {

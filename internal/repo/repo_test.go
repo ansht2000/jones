@@ -1,33 +1,38 @@
 package repo
 
 import (
+	"encoding/json"
+	"os"
+	"path/filepath"
 	"testing"
+
+	"github.com/adrg/xdg"
 )
 
 func TestParseRepoName(t *testing.T) {
-	cases := []struct{
-		repo_url string
+	cases := []struct {
+		repo_url      string
 		expected_user string
 		expected_repo string
-		expected_err error
+		expected_err  error
 	}{
 		{
-			repo_url: "https://github.com/ansht2000/anki-mcp.git",
+			repo_url:      "https://github.com/ansht2000/anki-mcp.git",
 			expected_user: "ansht2000",
 			expected_repo: "anki-mcp",
-			expected_err: nil,
+			expected_err:  nil,
 		},
 		{
-			repo_url: "git@github.com:ansht2000/anki-mcp.git",
+			repo_url:      "git@github.com:ansht2000/anki-mcp.git",
 			expected_user: "ansht2000",
 			expected_repo: "anki-mcp",
-			expected_err: nil,
+			expected_err:  nil,
 		},
 		{
-			repo_url: "haha.funny.poops.git",
+			repo_url:      "haha.funny.poops.git",
 			expected_user: "",
 			expected_repo: "",
-			expected_err: ErrInvalidRepoURL,
+			expected_err:  ErrInvalidRepoURL,
 		},
 	}
 
@@ -45,16 +50,13 @@ func TestParseRepoName(t *testing.T) {
 	}
 }
 
-// func TestBuildRepoTree(t *testing.T) {
-// 	repo := BuildRepoTree(RepoInfo{
-// 		repo_url: "https://github.com/ansht2000/hollywood.git",
-// 		user_name: "ansht2000",
-// 		repo_name: "hollywood",
-// 	})
-// 	// s := "\n"
-// 	// for _, child := range repo.children {
-// 	// 	s += fmt.Sprintf("%s\n", child.item_name)
-// 	// }
-// 	// t.Errorf("%s", s)
-// 	t.Errorf("%v, %d", repo, len(repo.children))
-// }
+func TestBuildRepoTree(t *testing.T) {
+	repo := BuildRepoTree("hollywood", filepath.Join(xdg.DataHome, "jones", "repos"))
+	// s := "\n"
+	// for _, child := range repo.children {
+	// 	s += fmt.Sprintf("%s\n", child.item_name)
+	// }
+	// t.Errorf("%s", s)
+	repo_data, _ := json.MarshalIndent(repo,"", "\t")
+	os.WriteFile("repo.json", repo_data, 0644)
+}

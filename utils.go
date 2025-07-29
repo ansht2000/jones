@@ -1,9 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/ansht2000/jones/internal/repo"
 )
 
 func (cm CommandMap) getKeys() []string {
@@ -31,9 +34,18 @@ func parseCommand(input string) (string, []string) {
 
 func getClonedRepos(repo_root string) map[string]string {
 	repo_list := make(map[string]string)
-	repos, _ :=  os.ReadDir(repo_root)
+	repos, _ := os.ReadDir(repo_root)
 	for _, repo := range repos {
 		repo_list[repo.Name()] = filepath.Join(repo_root, repo.Name())
 	}
 	return repo_list
+}
+
+func marshalRepoToJSON(repo *repo.RepoItem) ([]byte, error) {
+	repo_data, err := json.MarshalIndent(repo, "", "\t")
+	if err != nil {
+		return nil, err
+	}
+
+	return repo_data, nil
 }
