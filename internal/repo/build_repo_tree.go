@@ -2,6 +2,7 @@ package repo
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
@@ -22,7 +23,7 @@ type RepoItem struct {
 	Err      string      `json:"err"`
 }
 
-func addRepoTree(repo_item *RepoItem, repo_wg *sync.WaitGroup) {
+func scanRepo(repo_item *RepoItem, repo_wg *sync.WaitGroup) {
 	// TODO: this seems brittle, find a better way to do this
 	repo_dir_entries, err := os.ReadDir(repo_item.ItemPath)
 	if err != nil {
@@ -47,7 +48,7 @@ func addRepoTree(repo_item *RepoItem, repo_wg *sync.WaitGroup) {
 			repo_wg.Add(1)
 			go func() {
 				defer repo_wg.Done()
-				addRepoTree(&child_dir_item, repo_wg)
+				scanRepo(&child_dir_item, repo_wg)
 			}()
 		} else {
 			child_file_item := RepoItem{
@@ -69,8 +70,29 @@ func BuildRepoTree(repo_name, repo_path string) *RepoItem {
 	}
 
 	var repo_wg sync.WaitGroup
-	addRepoTree(&root_item, &repo_wg)
+	scanRepo(&root_item, &repo_wg)
 
 	repo_wg.Wait()
 	return &root_item
+}
+
+func scanRepoFolder(repo_string *string, repo_folder *RepoItem, indent int) {
+	for _, repo_item := range repo_folder.Children {
+		*repo_string += "|"
+		for range indent {
+			*repo_string += "\t|"
+		}
+
+		*repo_string += fmt.Sprintf("---%s\n", repo_item.ItemName)
+		if repo_item.IsDir {
+			scanRepoFolder(repo_string, repo_item, indent + 1)
+		}
+	}
+}
+
+func BuildRepoString(repo *RepoItem) string {
+	repo_string := fmt.Sprintf("%s\n", repo.ItemName)
+	indent := 0
+	scanRepoFolder(&repo_string, repo, indent)
+	return repo_string
 }

@@ -38,14 +38,14 @@ func getCommands() CommandMap {
 			callback:    commandClone,
 		},
 		"tree": {
-			name: "tree <repo_name>",
+			name:        "tree <repo_name>",
 			description: "Builds a tree representation of the selected repo",
-			callback: commandTree,
+			callback:    commandTree,
 		},
 		"list": {
-			name: "list",
+			name:        "list",
 			description: "List available repos",
-			callback: commandList,
+			callback:    commandList,
 		},
 	}
 }
