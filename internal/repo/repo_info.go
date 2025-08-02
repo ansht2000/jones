@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-type RepoInfo struct {
+type repoInfo struct {
 	// full repo git URL
 	repo_url string
 	// just the user, for convenience
@@ -19,15 +19,15 @@ type RepoInfo struct {
 
 var ErrInvalidRepoURL = errors.New("invalid git repo URL")
 
-func newRepoInfo(repo_url, clone_root string) (RepoInfo, error) {
+func newRepoInfo(repo_url, clone_root string) (repoInfo, error) {
 	user_name, repo_name, err := parseRepoNameFromURL(repo_url)
 	if err != nil {
-		return RepoInfo{}, err
+		return repoInfo{}, err
 	}
 
 	repo_path := filepath.Join(clone_root, repo_name)
 
-	return RepoInfo{
+	return repoInfo{
 		repo_url:  repo_url,
 		user_name: user_name,
 		repo_name: repo_name,

@@ -57,7 +57,7 @@ func main() {
 	var repo_manager *repo.RepoManager
 	if repo_root == "" {
 		log.Printf("Repo cloning root not set, using default: %s\n", xdg.DataHome)
-		repo_manager = repo.NewDefaultRepoManager()
+		repo_manager = repo.DefaultRepoManager()
 	} else {
 		log.Printf("Using repo cloning root: %s", repo_root)
 		repo_manager = repo.NewRepoManager(repo_root)

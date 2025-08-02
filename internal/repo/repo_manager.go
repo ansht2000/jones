@@ -14,7 +14,7 @@ func defaultRepoHome() string {
 	return filepath.Join(xdg.DataHome, "jones", "repos")
 }
 
-func NewDefaultRepoManager() *RepoManager {
+func DefaultRepoManager() *RepoManager {
 	return &RepoManager{
 		Root: defaultRepoHome(),
 	}

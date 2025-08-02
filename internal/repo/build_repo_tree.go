@@ -10,6 +10,8 @@ import (
 
 var ErrFailedDirRead = errors.New("failed to read items in directory")
 
+// TODO: look into turning this into a function that returns a map
+// research which one is more idiomatic/performant
 var IGNORE_LIST = map[string]struct{}{
 	".git": {},
 }
@@ -24,7 +26,6 @@ type RepoItem struct {
 }
 
 func scanRepo(repo_item *RepoItem, repo_wg *sync.WaitGroup) {
-	// TODO: this seems brittle, find a better way to do this
 	repo_dir_entries, err := os.ReadDir(repo_item.ItemPath)
 	if err != nil {
 		err_string := ErrFailedDirRead.Error() + ": " + err.Error()
@@ -32,7 +33,6 @@ func scanRepo(repo_item *RepoItem, repo_wg *sync.WaitGroup) {
 		return
 	}
 
-	// TODO: add an ignore list for files that are unimportant to the codebase later
 	for _, entry := range repo_dir_entries {
 		if _, ok := IGNORE_LIST[entry.Name()]; ok {
 			continue

@@ -1,10 +1,9 @@
 package main
 
 import (
-	// "fmt"
-
 	"github.com/ansht2000/jones/internal/repo"
 	"github.com/charmbracelet/bubbles/textinput"
+
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -17,12 +16,12 @@ const (
 )
 
 const logo = `
-     ____.
+     ____                            
     |    | ____   ____   ____   ______
     |    |/  _ \ /    \_/ __ \ /  ___/
-/\__|    (  <_> )   |  \  ___/ \___ \ 
-\________|\____/|___|  /\___  >____  >
-                     \/     \/     \/
+/\__|    (  |_| )   |  \  ___/ \___ \ 
+\________|\____/|___|  /\_____ ____  \
+                     \/             \/ 
 `
 
 type Model struct {

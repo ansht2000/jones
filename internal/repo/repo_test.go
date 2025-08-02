@@ -50,16 +50,16 @@ func TestParseRepoName(t *testing.T) {
 	}
 }
 
-// func TestBuildRepoTree(t *testing.T) {
-// 	repo := BuildRepoTree("hollywood", filepath.Join(xdg.DataHome, "jones", "repos"))
-// 	// s := "\n"
-// 	// for _, child := range repo.children {
-// 	// 	s += fmt.Sprintf("%s\n", child.item_name)
-// 	// }
-// 	// t.Errorf("%s", s)
-// 	repo_data, _ := json.MarshalIndent(repo, "", "\t")
-// 	os.WriteFile("repo.json", repo_data, 0644)
-// }
+func TestBuildRepoTree(t *testing.T) {
+	repo := BuildRepoTree("hollywood", filepath.Join(xdg.DataHome, "jones", "repos"))
+	// s := "\n"
+	// for _, child := range repo.children {
+	// 	s += fmt.Sprintf("%s\n", child.item_name)
+	// }
+	// t.Errorf("%s", s)
+	repo_data, _ := json.MarshalIndent(repo, "", "\t")
+	os.WriteFile("repo.json", repo_data, 0644)
+}
 
 func TestBuildRepoString(t *testing.T) {
 	repo := BuildRepoTree("hollywood", filepath.Join(xdg.DataHome, "jones", "repos", "hollywood"))
