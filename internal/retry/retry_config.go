@@ -25,25 +25,25 @@ type RetryOption func(*RetryConfig)
 
 func DefaultConstantRetryConfig() RetryConfig {
 	return RetryConfig{
-		BackoffType: Constant,
+		BackoffType:  Constant,
 		InitialDelay: time.Second,
-		MaxRetries: 10,
+		MaxRetries:   10,
 	}
 }
 
 func DefaultExponentialRetryConfig() RetryConfig {
 	return RetryConfig{
-		BackoffType: Exponential,
+		BackoffType:  Exponential,
 		InitialDelay: time.Second,
-		DelayScale: 2,
-		MaxRetries: 10,
+		DelayScale:   2,
+		MaxRetries:   10,
 	}
 }
 
 func DefaultFibonacciRetryConfig() RetryConfig {
 	return RetryConfig{
 		BackoffType: Fibonacci,
-		MaxRetries: 10,
+		MaxRetries:  10,
 	}
 }
 

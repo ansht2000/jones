@@ -20,9 +20,9 @@ type BackoffFunc func(ctx context.Context, backoff chan<- time.Duration, retry_c
 // TODO: look into turning this into a function that returns a map
 // research which one is more idiomatic/performant
 var backoffMap = map[BackoffType]BackoffFunc{
-	Constant: constantBackoff,
+	Constant:    constantBackoff,
 	Exponential: exponentialBackoff,
-	Fibonacci: fibonacciBackoff,
+	Fibonacci:   fibonacciBackoff,
 }
 
 func constantBackoff(ctx context.Context, backoff chan<- time.Duration, retry_config RetryConfig) {
@@ -63,7 +63,7 @@ func fibonacciBackoff(ctx context.Context, backoff chan<- time.Duration, retry_c
 		case <-ctx.Done():
 			return
 		case backoff <- delay:
-			a, b = b, a + b
+			a, b = b, a+b
 			delay *= time.Duration(a)
 		}
 	}

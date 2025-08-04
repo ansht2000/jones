@@ -29,7 +29,7 @@ func Retry(ctx context.Context, retry_func RetryFunc, retry_config RetryConfig) 
 func RetryWithValue[T any](ctx context.Context, retry_func RetryFuncWithValue[T], retry_config RetryConfig) (T, error) {
 	// nil value for type of return
 	var nilT T
-	
+
 	// check if context is already cancelled
 	select {
 	case <-ctx.Done():
@@ -61,7 +61,7 @@ func RetryWithValue[T any](ctx context.Context, retry_func RetryFuncWithValue[T]
 		defer cancel()
 
 		backoff := make(chan time.Duration)
-		
+
 		var backoff_func BackoffFunc
 		if retry_config.BackoffType == Custom {
 			backoff_func = retry_config.BackoffFunc

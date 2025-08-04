@@ -10,7 +10,7 @@ import (
 var errTest = errors.New("test error")
 
 func TestRetryExternalCancellation(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), 1 * time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 	err := Retry(ctx, func(ctx context.Context) error {
 		return errTest
@@ -48,7 +48,7 @@ func TestSuccessfulReturn(t *testing.T) {
 }
 
 func TestRetryExternalCancellationValue(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), 1 * time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 	val, err := RetryWithValue(ctx, func(ctx context.Context) (int, error) {
 		return 1, errTest
@@ -102,7 +102,7 @@ func TestSuccessfulReturnValue(t *testing.T) {
 func TestJitter(t *testing.T) {
 	sleep_time := 2 * time.Second
 	jitter := getRandomJitter(sleep_time)
-	if (sleep_time + time.Duration(jitter)) < (sleep_time - (sleep_time / 2)) || (sleep_time + time.Duration(jitter)) > (sleep_time + (sleep_time / 2)) {
-		t.Errorf("%v", sleep_time + time.Duration(jitter))
+	if (sleep_time+time.Duration(jitter)) < (sleep_time-(sleep_time/2)) || (sleep_time+time.Duration(jitter)) > (sleep_time+(sleep_time/2)) {
+		t.Errorf("%v", sleep_time+time.Duration(jitter))
 	}
 }

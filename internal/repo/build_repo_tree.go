@@ -85,7 +85,7 @@ func scanRepoFolder(repo_string *string, repo_folder *RepoItem, indent int) {
 
 		*repo_string += fmt.Sprintf("---%s\n", repo_item.ItemName)
 		if repo_item.IsDir {
-			scanRepoFolder(repo_string, repo_item, indent + 1)
+			scanRepoFolder(repo_string, repo_item, indent+1)
 		}
 	}
 }
