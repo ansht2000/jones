@@ -19,6 +19,13 @@ type RetryReturn[T any] struct {
 var ErrFunctionNotCompletedMaxRetries = errors.New("function did not succeed within given amount of retries")
 var ErrFunctionNotCompletedTimeout = errors.New("function did not succeed within given time")
 
+func Retry(ctx context.Context, retry_func RetryFunc, retry_config RetryConfig) error {
+	_, err := RetryWithValue(ctx, func(ctx context.Context) (*struct{}, error) {
+		return nil, retry_func(ctx)
+	}, retry_config)
+	return err
+}
+
 func RetryWithValue[T any](ctx context.Context, retry_func RetryFuncWithValue[T], retry_config RetryConfig) (T, error) {
 	// nil value for type of return
 	var nilT T
@@ -75,6 +82,18 @@ func RetryWithValue[T any](ctx context.Context, retry_func RetryFuncWithValue[T]
 				return
 			default:
 				sleep_time := <-backoff
+				if retry_config.DurationCap > 0 {
+					sleep_time = retry_config.DurationCap
+				}
+				// check to make sure the sleep time is greater than 0
+				// so the rand generator doesn't panic
+				// should not happen but it is good to check just in case
+				if retry_config.Jitter && sleep_time > 0 {
+					jitter := getRandomJitter(sleep_time)
+					sleep_time += time.Duration(jitter)
+				}
+
+				fmt.Printf("sleeping for %v seconds\n", sleep_time)
 				time.Sleep(sleep_time)
 				val, err = retry_func(ctx)
 				if err == nil {
@@ -99,74 +118,5 @@ func RetryWithValue[T any](ctx context.Context, retry_func RetryFuncWithValue[T]
 		return nilT, context.Cause(ctx)
 	case retry_return := <-done:
 		return retry_return.val, retry_return.err
-	}
-}
-
-func Retry(ctx context.Context, retry_func RetryFunc, retry_config RetryConfig) error {	
-	// check if context is already cancelled
-	select {
-	case <-ctx.Done():
-		return ctx.Err()
-	default:
-	}
-
-	// create cancellation if max duration is set
-	var cancel context.CancelFunc
-	if retry_config.MaxDuration > 0 {
-		ctx, cancel = context.WithTimeoutCause(ctx, retry_config.MaxDuration, ErrFunctionNotCompletedTimeout)
-		defer cancel()
-	}
-
-	done := make(chan error)
-	go func() {
-		err := retry_func(ctx)
-		if err == nil {
-			done <- nil
-			close(done)
-			return
-		}
-
-		var cancel context.CancelFunc
-		ctx, cancel = context.WithCancel(ctx)
-		defer cancel()
-
-		backoff := make(chan time.Duration)
-		
-		var backoff_func BackoffFunc
-		if retry_config.BackoffType == Custom {
-			backoff_func = retry_config.BackoffFunc
-		} else {
-			backoff_func = backoffMap[retry_config.BackoffType]
-		}
-
-		go backoff_func(ctx, backoff, retry_config)
-
-		for i := retry_config.MaxRetries; i != 0; i-- {
-			select {
-			case <-ctx.Done():
-				done <- context.Cause(ctx)
-				close(done)
-				return
-			default:
-				sleep_time := <-backoff
-				fmt.Printf("Sleeping for %v seconds\n", sleep_time)
-				time.Sleep(sleep_time)
-				err = retry_func(ctx)
-				if err == nil {
-					done <- nil
-					close(done)
-					return
-				}
-			}
-		}
-		done <- ErrFunctionNotCompletedMaxRetries
-		close(done)
-	}()
-
-	select {
-	case <-ctx.Done():
-		return context.Cause(ctx)
-	case err := <-done:
-		return err
 	}
 }

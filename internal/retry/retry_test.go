@@ -76,13 +76,14 @@ func TestRetryTimeoutValue(t *testing.T) {
 func TestRetryMaxRetriesValue(t *testing.T) {
 	val, err := RetryWithValue(context.Background(), func(ctx context.Context) (int, error) {
 		return 1, errTest
-	}, NewRetryConfig(WithBackoffType(Constant), WithMaxRetries(1)))
-	if !errors.Is(err, ErrFunctionNotCompletedMaxRetries) {
-		t.Errorf("Got unexpected error %v, was expecting %v\n", err, ErrFunctionNotCompletedMaxRetries)
-	}
-	if val != 0 {
-		t.Errorf("Expected nil value, got %d instead\n", val)
-	}
+	}, NewRetryConfig(WithBackoffType(Exponential), WithInitialDelay(1), WithDelayScale(2), WithMaxRetries(5), WithJitter()))
+	// if !errors.Is(err, ErrFunctionNotCompletedMaxRetries) {
+	// 	t.Errorf("Got unexpected error %v, was expecting %v\n", err, ErrFunctionNotCompletedMaxRetries)
+	// }
+	// if val != 0 {
+	// 	t.Errorf("Expected nil value, got %d instead\n", val)
+	// }
+	t.Error(val, err)
 }
 
 func TestSuccessfulReturnValue(t *testing.T) {
@@ -95,5 +96,13 @@ func TestSuccessfulReturnValue(t *testing.T) {
 	}
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %v instead\n", err)
+	}
+}
+
+func TestJitter(t *testing.T) {
+	sleep_time := 2 * time.Second
+	jitter := getRandomJitter(sleep_time)
+	if (sleep_time + time.Duration(jitter)) < (sleep_time - (sleep_time / 2)) || (sleep_time + time.Duration(jitter)) > (sleep_time + (sleep_time / 2)) {
+		t.Errorf("%v", sleep_time + time.Duration(jitter))
 	}
 }

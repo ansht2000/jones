@@ -17,8 +17,8 @@ type RetryConfig struct {
 	MaxDuration time.Duration
 	// Maximum attempts to retry the function
 	MaxRetries int
-	// Amount of jitter added to each delay
-	Jitter time.Duration
+	// Whether jitter should be added to the delay
+	Jitter bool
 }
 
 type RetryOption func(*RetryConfig)
@@ -90,9 +90,9 @@ func WithMaxRetries(max_retries int) RetryOption {
 	}
 }
 
-func WithJitter(jitter time.Duration) RetryOption {
+func WithJitter() RetryOption {
 	return func(rc *RetryConfig) {
-		rc.Jitter = jitter
+		rc.Jitter = true
 	}
 }
 

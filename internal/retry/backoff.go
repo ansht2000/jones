@@ -2,6 +2,7 @@ package retry
 
 import (
 	"context"
+	"math/rand"
 	"time"
 )
 
@@ -54,7 +55,7 @@ func exponentialBackoff(ctx context.Context, backoff chan<- time.Duration, retry
 
 func fibonacciBackoff(ctx context.Context, backoff chan<- time.Duration, retry_config RetryConfig) {
 	defer close(backoff)
-	
+
 	delay := retry_config.InitialDelay
 	a, b := 1, 1
 	for {
@@ -66,4 +67,8 @@ func fibonacciBackoff(ctx context.Context, backoff chan<- time.Duration, retry_c
 			delay *= time.Duration(a)
 		}
 	}
+}
+
+func getRandomJitter(time time.Duration) int64 {
+	return rand.Int63n(int64(time)) - (int64(time) / 2)
 }
