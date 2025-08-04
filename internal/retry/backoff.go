@@ -1,6 +1,9 @@
 package retry
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
 type BackoffType int
 
@@ -11,7 +14,7 @@ const (
 	Custom
 )
 
-type BackoffFunc func(yield func(time.Duration) bool)
+type BackoffFunc func(ctx context.Context, backoff chan<- time.Duration, retry_config RetryConfig)
 
 // TODO: look into turning this into a function that returns a map
 // research which one is more idiomatic/performant
@@ -21,8 +24,29 @@ var backoffMap = map[BackoffType]BackoffFunc{
 	Fibonacci: fibonacciBackoff,
 }
 
-func constantBackoff(yield func(time.Duration) bool) {}
+func constantBackoff(ctx context.Context, backoff chan<- time.Duration, retry_config RetryConfig) {
+	delay := retry_config.InitialDelay
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		default:
+			backoff <- delay
+		}
+	}
+}
 
-func exponentialBackoff(yield func(time.Duration) bool) {}
+func exponentialBackoff(ctx context.Context, backoff chan<- time.Duration, retry_config RetryConfig) {
+	delay := retry_config.InitialDelay
+	scale := retry_config.DelayScale
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case backoff <- delay:
+			delay *= time.Duration(scale)
+		}
+	}
+}
 
-func fibonacciBackoff(yield func(time.Duration) bool) {}
+func fibonacciBackoff(ctx context.Context, backoff chan<- time.Duration, retry_config RetryConfig) {}

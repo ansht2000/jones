@@ -3,9 +3,9 @@ package main
 import "fmt"
 
 func commandList(model *Model, args ...string) string {
-	return_str := "Available repos:\n"
+	return_str := "Available repos:\n\n"
 	for repo := range model.repo_list {
 		return_str += fmt.Sprintf(repo + "\n")
 	}
-	return return_str
+	return return_str + "\n"
 }
