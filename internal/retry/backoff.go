@@ -25,18 +25,21 @@ var backoffMap = map[BackoffType]BackoffFunc{
 }
 
 func constantBackoff(ctx context.Context, backoff chan<- time.Duration, retry_config RetryConfig) {
+	defer close(backoff)
+
 	delay := retry_config.InitialDelay
 	for {
 		select {
 		case <-ctx.Done():
 			return
-		default:
-			backoff <- delay
+		case backoff <- delay:
 		}
 	}
 }
 
 func exponentialBackoff(ctx context.Context, backoff chan<- time.Duration, retry_config RetryConfig) {
+	defer close(backoff)
+
 	delay := retry_config.InitialDelay
 	scale := retry_config.DelayScale
 	for {
@@ -49,4 +52,18 @@ func exponentialBackoff(ctx context.Context, backoff chan<- time.Duration, retry
 	}
 }
 
-func fibonacciBackoff(ctx context.Context, backoff chan<- time.Duration, retry_config RetryConfig) {}
+func fibonacciBackoff(ctx context.Context, backoff chan<- time.Duration, retry_config RetryConfig) {
+	defer close(backoff)
+	
+	delay := retry_config.InitialDelay
+	a, b := 1, 1
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case backoff <- delay:
+			a, b = b, a + b
+			delay *= time.Duration(a)
+		}
+	}
+}
