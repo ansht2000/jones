@@ -3,7 +3,6 @@ package retry
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 )
 
@@ -93,7 +92,6 @@ func RetryWithValue[T any](ctx context.Context, retry_func RetryFuncWithValue[T]
 					sleep_time += time.Duration(jitter)
 				}
 
-				fmt.Printf("sleeping for %v seconds\n", sleep_time)
 				time.Sleep(sleep_time)
 				val, err = retry_func(ctx)
 				if err == nil {
