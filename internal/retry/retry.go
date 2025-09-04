@@ -15,8 +15,10 @@ type RetryReturn[T any] struct {
 	err error
 }
 
-var ErrFunctionNotCompletedMaxRetries = errors.New("function did not succeed within given amount of retries")
-var ErrFunctionNotCompletedTimeout = errors.New("function did not succeed within given time")
+var (
+	ErrFunctionNotCompletedMaxRetries = errors.New("function did not succeed within given amount of retries")
+	ErrFunctionNotCompletedTimeout = errors.New("function did not succeed within given time")
+)
 
 func Retry(ctx context.Context, retry_func RetryFunc, retry_config RetryConfig) error {
 	_, err := RetryWithValue(ctx, func(ctx context.Context) (*struct{}, error) {
@@ -84,6 +86,7 @@ func RetryWithValue[T any](ctx context.Context, retry_func RetryFuncWithValue[T]
 				if retry_config.DurationCap > 0 {
 					sleep_time = retry_config.DurationCap
 				}
+				
 				// check to make sure the sleep time is greater than 0
 				// so the rand generator doesn't panic
 				// should not happen but it is good to check just in case

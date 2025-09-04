@@ -8,20 +8,20 @@ import (
 
 type RepoManager struct {
 	Root string
+	Tree string
 }
 
-func defaultRepoHome() string {
+func DefaultRepoHome() string {
 	return filepath.Join(xdg.DataHome, "jones", "repos")
 }
 
-func DefaultRepoManager() *RepoManager {
-	return &RepoManager{
-		Root: defaultRepoHome(),
-	}
+func DefaultTreeHome() string {
+	return filepath.Join(xdg.DataHome, "jones", "trees")
 }
 
-func NewRepoManager(root string) *RepoManager {
+func NewRepoManager(root, tree string) *RepoManager {
 	return &RepoManager{
 		Root: root,
+		Tree: tree,
 	}
 }

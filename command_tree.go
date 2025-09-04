@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/ansht2000/jones/internal/repo"
 )
@@ -23,8 +24,9 @@ func commandTree(model *Model, args ...string) string {
 		return err.Error()
 	}
 
-	repo_JSON_filename := fmt.Sprintf("%s_tree.json", repo_name)
-	err = os.WriteFile(repo_JSON_filename, repo_data, 0644)
+	repo_JSON_filename := fmt.Sprintf("%s.json", repo_name)
+	repo_JSON_path := filepath.Join(model.repo_manager.Tree, repo_JSON_filename)
+	err = os.WriteFile(repo_JSON_path, repo_data, 0644)
 	if err != nil {
 		return err.Error()
 	}

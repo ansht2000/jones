@@ -1,6 +1,9 @@
 package main
 
 import (
+	"log"
+	"os"
+
 	"github.com/ansht2000/jones/internal/repo"
 	"github.com/charmbracelet/bubbles/textinput"
 
@@ -48,6 +51,18 @@ func initialModel(repo_manager *repo.RepoManager) Model {
 }
 
 func (m Model) Init() tea.Cmd {
+	repo_root_path := m.repo_manager.Root
+	err := os.MkdirAll(repo_root_path, 0777)
+	if err != nil {
+		log.Fatalf("failed to create repo root directory in %s: %v\n", m.repo_manager.Root, err)
+	}
+
+	repo_tree_path := m.repo_manager.Tree
+	err = os.MkdirAll(repo_tree_path, 0777)
+	if err != nil {
+		log.Fatalf("failed to create repo tree directory in %s: %v\n", m.repo_manager.Tree, err)
+	}
+
 	return nil
 }
 

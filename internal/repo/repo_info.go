@@ -43,8 +43,8 @@ func parseRepoNameFromURL(repo_url string) (user_name, repo_name string, err err
 		user_name = url_parts[len(url_parts)-2]
 		repo_name = strings.TrimRight(url_parts[len(url_parts)-1], ".git")
 		return user_name, repo_name, nil
-		// check if url uses ssh format
-		// ssh format: git@github.com:{user}/{repo}.git
+	// check if url uses ssh format
+	// ssh format: git@github.com:{user}/{repo}.git
 	} else if strings.HasPrefix(repo_url, "git@github.com") {
 		url_parts := strings.Split(repo_url, ":")
 		url_repo_parts := strings.Split(url_parts[len(url_parts)-1], "/")

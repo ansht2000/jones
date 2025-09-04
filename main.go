@@ -8,7 +8,6 @@ import (
 	// "log"
 	"os"
 
-	"github.com/adrg/xdg"
 	"github.com/ansht2000/jones/internal/repo"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/joho/godotenv"
@@ -50,18 +49,18 @@ func main() {
 	godotenv.Load(".env")
 
 	repo_root := os.Getenv("REPO_ROOT")
-
-	// this seems convoluted for just holding a root url
-	// but in case i want to add support for custom filesystems
-	// it will be useful
-	var repo_manager *repo.RepoManager
 	if repo_root == "" {
-		log.Printf("Repo cloning root not set, using default: %s\n", xdg.DataHome)
-		repo_manager = repo.DefaultRepoManager()
-	} else {
-		log.Printf("Using repo cloning root: %s", repo_root)
-		repo_manager = repo.NewRepoManager(repo_root)
+		repo_root = repo.DefaultRepoHome()
+		log.Printf("Repo root not set in environment, using default: %s", repo_root)
 	}
+
+	tree_root := os.Getenv("TREE_ROOT")
+	if tree_root == "" {
+		tree_root = repo.DefaultTreeHome()
+		log.Printf("Tree root not set in environment, using default: %s", tree_root)
+	}
+
+	repo_manager := repo.NewRepoManager(repo_root, tree_root)
 
 	p := tea.NewProgram(initialModel(repo_manager))
 	if _, err := p.Run(); err != nil {
