@@ -132,7 +132,7 @@ func LoadAnalysis(save_dir, repo_name string) (*Analysis, error) {
 		return nil, err
 	}
 
-	data, err := os.ReadFile(savePath(save_dir, repo_name))
+	data, err := os.ReadFile(SavePath(save_dir, repo_name))
 	if err != nil {
 		return nil, err
 	}
@@ -169,10 +169,11 @@ func saveAnalysis(save_dir string, analysis *Analysis) error {
 	if err := tmp.Close(); err != nil {
 		return err
 	}
-	return os.Rename(tmp.Name(), savePath(save_dir, analysis.Name))
+	return os.Rename(tmp.Name(), SavePath(save_dir, analysis.Name))
 }
 
-func savePath(save_dir, repo_name string) string {
+// Where the analysis of a repo is saved
+func SavePath(save_dir, repo_name string) string {
 	return filepath.Join(save_dir, repo_name+".json")
 }
 

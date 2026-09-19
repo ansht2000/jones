@@ -63,6 +63,8 @@ const (
 	EventAnswerStart EventKind = "answer_start"
 	// Text is the next part of the answer
 	EventAnswerChunk EventKind = "answer_chunk"
+	// The finished answer is being checked
+	EventChecking EventKind = "checking"
 	// The answer failed verification because of Issues and will be redone
 	EventRetry EventKind = "retry"
 	// Verification is done, and Issues lists problems left in the final answer

@@ -452,7 +452,7 @@ func TestAnalyzeInvalidName(t *testing.T) {
 
 func TestLoadAnalysisOutdated(t *testing.T) {
 	save_dir := t.TempDir()
-	if err := os.WriteFile(savePath(save_dir, "demo"), []byte(`{"version": 0}`), 0644); err != nil {
+	if err := os.WriteFile(SavePath(save_dir, "demo"), []byte(`{"version": 0}`), 0644); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := LoadAnalysis(save_dir, "demo"); !errors.Is(err, ErrOutdated) {

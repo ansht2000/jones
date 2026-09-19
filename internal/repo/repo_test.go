@@ -69,6 +69,19 @@ func TestParseRepoName(t *testing.T) {
 			repo_url:     "git@github.com:foo/.git",
 			expected_err: ErrInvalidRepoURL,
 		},
+		// names that would put the clone in the repo root or above it
+		{
+			repo_url:     "https://github.com/foo/..",
+			expected_err: ErrInvalidRepoURL,
+		},
+		{
+			repo_url:     "https://github.com/foo/..git",
+			expected_err: ErrInvalidRepoURL,
+		},
+		{
+			repo_url:     "git@github.com:foo/.",
+			expected_err: ErrInvalidRepoURL,
+		},
 	}
 
 	for _, c := range cases {

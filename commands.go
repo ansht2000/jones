@@ -2,10 +2,12 @@ package main
 
 import tea "github.com/charmbracelet/bubbletea"
 
+// Commands that take a while return a tea.Cmd that runs them in the
+// background, quick ones change the model and return nil
 type Command struct {
 	name        string
 	description string
-	callback    func(*Model, ...string) string
+	callback    func(*Model, ...string) tea.Cmd
 }
 
 type CommandMap map[string]Command
@@ -34,7 +36,7 @@ func getCommands() CommandMap {
 		},
 		"clone": {
 			name:        "clone <repo_url>",
-			description: "Clones a git repo into the working directory",
+			description: "Clones a git repo",
 			callback:    commandClone,
 		},
 		"tree": {
@@ -46,6 +48,31 @@ func getCommands() CommandMap {
 			name:        "list",
 			description: "List available repos",
 			callback:    commandList,
+		},
+		"analyze": {
+			name:        "analyze <repo_name>",
+			description: "Summarizes a repo so you can ask questions about it, rerun it to catch up on changes",
+			callback:    commandAnalyze,
+		},
+		"use": {
+			name:        "use <repo_name>",
+			description: "Picks the analyzed repo to ask questions about",
+			callback:    commandUse,
+		},
+		"ask": {
+			name:        "ask <question>",
+			description: "Asks a question about the repo in use, anything that isn't a command is asked too",
+			callback:    commandAsk,
+		},
+		"clear": {
+			name:        "clear",
+			description: "Clears the screen",
+			callback:    commandClear,
+		},
+		"quit": {
+			name:        "quit",
+			description: "Quits jones",
+			callback:    commandQuit,
 		},
 	}
 }

@@ -321,6 +321,7 @@ func verifyNode(client llm.Client, options Options) *actorflow.Node[qaStore, ver
 			return job, nil
 		},
 		Exec: func(ctx context.Context, job verifyJob) (verifyResult, error) {
+			options.emit(Event{Kind: EventChecking})
 			citations, issues := checkCitations(job.answer, job.read_lines, job.repo_files)
 			// a call to check the claims isn't worth it when the citations are already wrong
 			if len(issues) > 0 || !options.VerifyWithModel {

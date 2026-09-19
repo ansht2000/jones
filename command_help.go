@@ -1,12 +1,22 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"maps"
+	"slices"
+	"strings"
 
-func commandHelp(model *Model, args ...string) string {
-	s := "Usage:\n\n"
-	for _, cmd := range getCommands() {
-		s += fmt.Sprintf("%s: %s\n", cmd.name, cmd.description)
+	tea "github.com/charmbracelet/bubbletea"
+)
+
+func commandHelp(model *Model, args ...string) tea.Cmd {
+	var help strings.Builder
+	help.WriteString("Usage:\n\n")
+	for _, command_name := range slices.Sorted(maps.Keys(model.commands)) {
+		command := model.commands[command_name]
+		fmt.Fprintf(&help, "%s: %s\n", command.name, command.description)
 	}
-	s += "\n"
-	return s
+	help.WriteString("\nup/down and pgup/pgdn scroll, esc cancels what's running, ctrl+c quits")
+	model.addEntry(entryOutput, help.String())
+	return nil
 }

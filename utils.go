@@ -26,7 +26,10 @@ func (cm CommandMap) getValues() []Command {
 }
 
 func parseCommand(input string) (string, []string) {
-	parts := strings.Split(input, " ")
+	parts := strings.Fields(input)
+	if len(parts) == 0 {
+		return "", nil
+	}
 	command := parts[0]
 	args := parts[1:]
 	return command, args
@@ -36,7 +39,10 @@ func getClonedRepos(repo_root string) map[string]string {
 	repo_list := make(map[string]string)
 	repos, _ := os.ReadDir(repo_root)
 	for _, repo := range repos {
-		repo_list[repo.Name()] = filepath.Join(repo_root, repo.Name())
+		// only directories are repos
+		if repo.IsDir() {
+			repo_list[repo.Name()] = filepath.Join(repo_root, repo.Name())
+		}
 	}
 	return repo_list
 }
@@ -48,4 +54,20 @@ func marshalRepoToJSON(repo *repo.RepoItem) ([]byte, error) {
 	}
 
 	return repo_data, nil
+}
+
+func capitalize(s string) string {
+	if s == "" {
+		return s
+	}
+	return strings.ToUpper(s[:1]) + s[1:]
+}
+
+// Each item on its own line, as a list
+func bullets(items []string) string {
+	lines := make([]string, len(items))
+	for i, item := range items {
+		lines[i] = "- " + item
+	}
+	return strings.Join(lines, "\n")
 }

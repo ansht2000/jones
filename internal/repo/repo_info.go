@@ -63,7 +63,9 @@ func parseRepoNameFromURL(repo_url string) (user_name, repo_name string, err err
 	}
 	user_name = url_repo_parts[0]
 	repo_name = strings.TrimSuffix(url_repo_parts[1], ".git")
-	if user_name == "" || repo_name == "" {
+	// the repo name becomes a directory in the repo root, so it
+	// can't be empty or name the root or its parent
+	if user_name == "" || repo_name == "" || repo_name == "." || repo_name == ".." || strings.Contains(repo_name, `\`) {
 		return "", "", ErrInvalidRepoURL
 	}
 	return user_name, repo_name, nil

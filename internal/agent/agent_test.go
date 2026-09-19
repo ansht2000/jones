@@ -209,7 +209,7 @@ func TestAsk(t *testing.T) {
 		"<file path=\"main.go\">", "<file path=\"greet/hello.go\">", "7| \tfmt.Println(\"hello\")")
 	checkContains(t, "the verify prompt", nthPrompt(t, mock, llm.VERIFY_PROMPT, 0), "<answer>\n"+text+"\n</answer>")
 
-	expected_kinds := []EventKind{EventDecided, EventRead, EventDecided, EventRead, EventDecided, EventAnswerStart, EventAnswerChunk, EventVerified}
+	expected_kinds := []EventKind{EventDecided, EventRead, EventDecided, EventRead, EventDecided, EventAnswerStart, EventAnswerChunk, EventChecking, EventVerified}
 	if kinds := eventKinds(events); !slices.Equal(kinds, expected_kinds) {
 		t.Errorf("Expected events %v, got %v\n", expected_kinds, kinds)
 	}
@@ -470,7 +470,7 @@ func TestAskRestartsBrokenStream(t *testing.T) {
 		t.Errorf("Expected the restarted answer, got %+v\n", answer)
 	}
 	// the second start tells the TUI to clear the partial answer
-	expected_kinds := []EventKind{EventDecided, EventRead, EventDecided, EventAnswerStart, EventAnswerChunk, EventAnswerStart, EventAnswerChunk, EventVerified}
+	expected_kinds := []EventKind{EventDecided, EventRead, EventDecided, EventAnswerStart, EventAnswerChunk, EventAnswerStart, EventAnswerChunk, EventChecking, EventVerified}
 	if kinds := eventKinds(events); !slices.Equal(kinds, expected_kinds) {
 		t.Errorf("Expected events %v, got %v\n", expected_kinds, kinds)
 	}
