@@ -105,6 +105,13 @@ func RetryWithValue[T any](ctx context.Context, retry_func RetryFuncWithValue[T]
 		}
 
 		delay = retry_config.applyJitterAndCap(delay)
+		// a delay requested by the error isn't capped, since retrying
+		// sooner would fail again, MaxDuration still limits the total time
+		if retry_config.RetryAfter != nil {
+			if retry_after, ok := retry_config.RetryAfter(err); ok && retry_after > delay {
+				delay = retry_after
+			}
+		}
 		if retry_config.OnRetry != nil {
 			retry_config.OnRetry(attempt+1, err, delay)
 		}

@@ -24,6 +24,9 @@ type RetryConfig struct {
 	// Decides whether an error should be retried, if nil every error
 	// is retried except ones wrapped with Permanent
 	RetryIf func(err error) bool
+	// Returns a delay requested by the error, like a server's retry-after,
+	// which is used instead of the backoff's delay when it is longer
+	RetryAfter func(err error) (time.Duration, bool)
 	// Called before sleeping for each retry, attempt starts at 1
 	OnRetry func(attempt int, err error, delay time.Duration)
 }
@@ -111,6 +114,12 @@ func WithJitter() RetryOption {
 func WithRetryIf(retry_if func(err error) bool) RetryOption {
 	return func(rc *RetryConfig) {
 		rc.RetryIf = retry_if
+	}
+}
+
+func WithRetryAfter(retry_after func(err error) (time.Duration, bool)) RetryOption {
+	return func(rc *RetryConfig) {
+		rc.RetryAfter = retry_after
 	}
 }
 

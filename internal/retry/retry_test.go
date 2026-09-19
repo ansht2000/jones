@@ -179,6 +179,60 @@ func TestOnRetry(t *testing.T) {
 	}
 }
 
+func TestRetryAfter(t *testing.T) {
+	errSlowDown := errors.New("slow down")
+	ms := time.Millisecond
+	calls := 0
+	delays := []time.Duration{}
+	Retry(context.Background(), func(ctx context.Context) error {
+		calls++
+		if calls == 1 {
+			return errSlowDown
+		}
+		return errTest
+	}, NewRetryConfig(
+		WithBackoffType(Exponential),
+		WithInitialDelay(5*ms),
+		WithDurationCap(8*ms),
+		WithMaxRetries(3),
+		WithRetryAfter(func(err error) (time.Duration, bool) {
+			if errors.Is(err, errSlowDown) {
+				return 20 * ms, true
+			}
+			// shorter than the backoff, so the backoff's delay is used
+			return ms, true
+		}),
+		WithOnRetry(func(attempt int, err error, delay time.Duration) {
+			delays = append(delays, delay)
+		}),
+	))
+
+	// the requested delay replaces the backoff and ignores the cap
+	expected := []time.Duration{20 * ms, 8 * ms, 8 * ms}
+	if !slices.Equal(delays, expected) {
+		t.Errorf("Expected delays %v, got %v\n", expected, delays)
+	}
+}
+
+func TestRetryAfterNotRequested(t *testing.T) {
+	delays := []time.Duration{}
+	Retry(context.Background(), alwaysFail, NewRetryConfig(
+		WithInitialDelay(time.Millisecond),
+		WithMaxRetries(2),
+		WithRetryAfter(func(err error) (time.Duration, bool) {
+			return time.Hour, false
+		}),
+		WithOnRetry(func(attempt int, err error, delay time.Duration) {
+			delays = append(delays, delay)
+		}),
+	))
+
+	expected := []time.Duration{time.Millisecond, time.Millisecond}
+	if !slices.Equal(delays, expected) {
+		t.Errorf("Expected delays %v, got %v\n", expected, delays)
+	}
+}
+
 func TestCancelDuringSleep(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
