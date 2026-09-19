@@ -3,26 +3,33 @@ package actorflow
 type Action int
 
 const (
+	// Default action, noop
 	Default Action = iota
+	
 )
 
-type Node interface {
+type node interface {
 	Prep()
-	Exec()
-	Post() Action
-	Next(Node)
+	Exec(Action)
+	Post(Action) Action
+	Next(*node)
 }
 
-type FileNode struct {
-	FileContent string
-	
+type fileReaderNode struct {
+	parent *node
+	siblings []*node
 }
 
-func (fn *FileNode) Prep() {}
+func (fr *fileReaderNode) Prep() {}
 
-func (fn *FileNode) Exec() {}
+func (fr *fileReaderNode) Exec(action Action) {}
 
-func (fn *FileNode) Post() Action { return Default }
+func (fr *fileReaderNode) Post(action Action) Action { return Default }
 
-func (fn *FileNode) Next(node Node) {}
+func (fr *fileReaderNode) next(node *node) {}
 
+func (fr *fileReaderNode) run() {
+	fr.Prep()
+	fr.Exec(Default)
+	fr.Post(Default)
+}
