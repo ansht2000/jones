@@ -2,3 +2,4 @@ sources.md
 .env
 *_tree.json
 *_tree.txt
+bin/

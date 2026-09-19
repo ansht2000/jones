@@ -5,7 +5,6 @@ type Action int
 const (
 	// Default action, noop
 	Default Action = iota
-	
 )
 
 type node interface {
@@ -16,7 +15,7 @@ type node interface {
 }
 
 type fileReaderNode struct {
-	parent *node
+	parent   *node
 	siblings []*node
 }
 

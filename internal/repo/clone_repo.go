@@ -2,7 +2,9 @@ package repo
 
 import (
 	"errors"
+	"fmt"
 	"os/exec"
+	"strings"
 )
 
 const (
@@ -11,6 +13,7 @@ const (
 )
 
 var ErrRepoAlreadyFound = errors.New("repo already cloned")
+var ErrCloneFailed = errors.New("failed to clone repo")
 
 // TODO: look into using go-git (https://github.com/go-git/go-git) for cloning repos instead
 // may be worth it, may not be
@@ -24,7 +27,10 @@ func CloneRepo(repo_url string, repo_root string, repo_list map[string]string) (
 		return "", "", ErrRepoAlreadyFound
 	}
 
-	clone_cmd := exec.Command(GIT, CLONE, repo_info.repo_url, repo_info.repo_path)
-	clone_cmd.Run()
+	// shallow clone, history isn't needed to explore the code
+	clone_cmd := exec.Command(GIT, CLONE, "--depth", "1", repo_info.repo_url, repo_info.repo_path)
+	if output, err := clone_cmd.CombinedOutput(); err != nil {
+		return "", "", fmt.Errorf("%w: %w: %s", ErrCloneFailed, err, strings.TrimSpace(string(output)))
+	}
 	return repo_info.repo_name, repo_info.repo_path, nil
 }

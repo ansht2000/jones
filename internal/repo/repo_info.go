@@ -36,22 +36,35 @@ func newRepoInfo(repo_url, clone_root string) (repoInfo, error) {
 }
 
 func parseRepoNameFromURL(repo_url string) (user_name, repo_name string, err error) {
+	var repo_part string
 	// check if url uses http format
 	// http format: https://github.com/{user}/{repo}.git
-	if strings.HasPrefix(repo_url, "https:") {
-		url_parts := strings.Split(repo_url, "/")
-		user_name = url_parts[len(url_parts)-2]
-		repo_name = strings.TrimRight(url_parts[len(url_parts)-1], ".git")
-		return user_name, repo_name, nil
-	// check if url uses ssh format
-	// ssh format: git@github.com:{user}/{repo}.git
-	} else if strings.HasPrefix(repo_url, "git@github.com") {
-		url_parts := strings.Split(repo_url, ":")
-		url_repo_parts := strings.Split(url_parts[len(url_parts)-1], "/")
-		user_name = url_repo_parts[len(url_repo_parts)-2]
-		repo_name = strings.TrimRight(url_repo_parts[len(url_repo_parts)-1], ".git")
-		return user_name, repo_name, nil
+	if rest, ok := strings.CutPrefix(repo_url, "https://"); ok {
+		// drop the host
+		_, repo_part, ok = strings.Cut(rest, "/")
+		if !ok {
+			return "", "", ErrInvalidRepoURL
+		}
+		// check if url uses ssh format
+		// ssh format: git@github.com:{user}/{repo}.git
+	} else if strings.HasPrefix(repo_url, "git@") {
+		var ok bool
+		_, repo_part, ok = strings.Cut(repo_url, ":")
+		if !ok {
+			return "", "", ErrInvalidRepoURL
+		}
 	} else {
 		return "", "", ErrInvalidRepoURL
 	}
+
+	url_repo_parts := strings.Split(strings.Trim(repo_part, "/"), "/")
+	if len(url_repo_parts) != 2 {
+		return "", "", ErrInvalidRepoURL
+	}
+	user_name = url_repo_parts[0]
+	repo_name = strings.TrimSuffix(url_repo_parts[1], ".git")
+	if user_name == "" || repo_name == "" {
+		return "", "", ErrInvalidRepoURL
+	}
+	return user_name, repo_name, nil
 }
