@@ -19,6 +19,10 @@ func DefaultTreeHome() string {
 	return filepath.Join(xdg.DataHome, "jones", "trees")
 }
 
+func DefaultAnalysisHome() string {
+	return filepath.Join(xdg.DataHome, "jones", "analysis")
+}
+
 func NewRepoManager(root, tree string) *RepoManager {
 	return &RepoManager{
 		Root: root,

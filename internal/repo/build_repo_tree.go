@@ -4,16 +4,26 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"sync"
 )
 
 var ErrFailedDirRead = errors.New("failed to read items in directory")
 
+// Names of files and directories that are never scanned, even when
+// tracked by git, since they hold third party code or tool state
 // TODO: look into turning this into a function that returns a map
 // research which one is more idiomatic/performant
 var IGNORE_LIST = map[string]struct{}{
-	".git": {},
+	".git":         {},
+	"node_modules": {},
+	"vendor":       {},
+	"__pycache__":  {},
+	".venv":        {},
+	"venv":         {},
+	".idea":        {},
+	".vscode":      {},
 }
 
 type RepoItem struct {
@@ -25,7 +35,8 @@ type RepoItem struct {
 	Err      string      `json:"err"`
 }
 
-func scanRepo(repo_item *RepoItem, repo_wg *sync.WaitGroup) {
+// rel_path is the item's path relative to the repo root, with forward slashes
+func scanRepo(repo_item *RepoItem, rel_path string, filter *repoFilter, repo_wg *sync.WaitGroup) {
 	repo_dir_entries, err := os.ReadDir(repo_item.ItemPath)
 	if err != nil {
 		err_string := ErrFailedDirRead.Error() + ": " + err.Error()
@@ -34,7 +45,8 @@ func scanRepo(repo_item *RepoItem, repo_wg *sync.WaitGroup) {
 	}
 
 	for _, entry := range repo_dir_entries {
-		if _, ok := IGNORE_LIST[entry.Name()]; ok {
+		child_rel_path := path.Join(rel_path, entry.Name())
+		if !filter.include(child_rel_path) {
 			continue
 		}
 		if entry.IsDir() {
@@ -48,7 +60,7 @@ func scanRepo(repo_item *RepoItem, repo_wg *sync.WaitGroup) {
 			repo_wg.Add(1)
 			go func() {
 				defer repo_wg.Done()
-				scanRepo(&child_dir_item, repo_wg)
+				scanRepo(&child_dir_item, child_rel_path, filter, repo_wg)
 			}()
 		} else {
 			child_file_item := RepoItem{
@@ -70,7 +82,7 @@ func BuildRepoTree(repo_name, repo_path string) *RepoItem {
 	}
 
 	var repo_wg sync.WaitGroup
-	scanRepo(&root_item, &repo_wg)
+	scanRepo(&root_item, "", newRepoFilter(repo_path), &repo_wg)
 
 	repo_wg.Wait()
 	return &root_item
