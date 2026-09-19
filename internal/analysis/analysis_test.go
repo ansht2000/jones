@@ -126,7 +126,7 @@ func TestAnalyze(t *testing.T) {
 			t.Errorf("Expected %s to have a SHA-256 hash and its size, got %q and %d\n", file, record.Hash, record.Size)
 		}
 	}
-	for file, reason := range map[string]string{"go.sum": skipLockfile, "empty.txt": skipEmpty, "logo.png": skipBinary} {
+	for file, reason := range map[string]string{"go.sum": SkipLockfile, "empty.txt": SkipEmpty, "logo.png": SkipBinary} {
 		record := result.Files[file]
 		if record.Skipped != reason || record.Summary.Purpose != SKIPPED_PURPOSES[reason] {
 			t.Errorf("Expected %s to be skipped as %s, got %+v\n", file, reason, record)
@@ -430,7 +430,7 @@ func TestAnalyzeSkipsSymlinks(t *testing.T) {
 	if leaked {
 		t.Error("A file outside the repo was sent to the model through a symlink")
 	}
-	if record := result.Files["link.txt"]; record == nil || record.Skipped != skipSymlink {
+	if record := result.Files["link.txt"]; record == nil || record.Skipped != SkipSymlink {
 		t.Errorf("Expected the symlink to be skipped, got %+v\n", record)
 	}
 }

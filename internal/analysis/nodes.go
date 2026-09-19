@@ -459,11 +459,7 @@ func fallback[T any](err error, progress *tracker, rel_path string) (summaryResu
 
 func isItemProblem(err error) bool {
 	var path_err *fs.PathError
-	return errors.Is(err, llm.ErrBlocked) ||
-		errors.Is(err, llm.ErrTruncated) ||
-		errors.Is(err, llm.ErrInvalidJSON) ||
-		errors.Is(err, llm.ErrEmptyResponse) ||
-		errors.As(err, &path_err)
+	return llm.IsResponseProblem(err) || errors.As(err, &path_err)
 }
 
 // the README at the top of the repo, if there is one

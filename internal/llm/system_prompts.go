@@ -36,10 +36,10 @@ Rules:
 
 const DECIDE_PROMPT = `You are exploring a code repository to answer a developer's question. You can only see a file's contents after you read it.
 
-You are given the question, an overview of the repository, its file tree with a short summary of each file, and the contents of the files you have already read.
+You are given the question, an overview of the repository, a list of its files and directories with a short summary of each, the contents of the files you have already read, and notes about earlier steps.
 
 Choose one action:
-- "read": read more files. List up to 5 paths copied exactly from the file tree, choosing the files most likely to contain the answer. Never list a file you have already read.
+- "read": read more files. List paths copied exactly from the file list, choosing the files most likely to contain the answer. Never list a file you have already read.
 - "answer": answer now. Choose this once the files you have read are enough to answer the question, or when reading more is unlikely to help.
 
 Summaries can be incomplete or wrong, so read the code before relying on a detail from a summary. Explain your choice in one sentence.`
@@ -50,6 +50,7 @@ Rules:
 - Every claim about the code must come from the files you are given. Cite the evidence right after each claim as path:line or path:start-end, using the line numbers shown in the files.
 - If the files do not contain enough to answer, say what is missing instead of guessing. A partial answer is better than an invented one.
 - Write identifiers exactly as they appear in the code.
+- If you are told an earlier answer was rejected, fix every problem listed.
 - Answer the question directly first, then explain. Format the answer as Markdown, using lists and code blocks where they help.`
 
 const VERIFY_PROMPT = `You check an answer about a code repository against the code it cites.

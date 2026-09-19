@@ -44,6 +44,17 @@ var (
 	ErrStreamInterrupted = errors.New("response stream ended before the model finished")
 )
 
+// Reports whether err came from what the model returned, like a refusal or
+// invalid JSON, rather than from the request or the connection. Clients
+// retry the ones that can be retried first, so callers seeing one can use a
+// placeholder or carry on without the response instead of failing.
+func IsResponseProblem(err error) bool {
+	return errors.Is(err, ErrBlocked) ||
+		errors.Is(err, ErrTruncated) ||
+		errors.Is(err, ErrInvalidJSON) ||
+		errors.Is(err, ErrEmptyResponse)
+}
+
 // Returns a pointer to v, for the optional fields in Request
 func Ptr[T any](v T) *T {
 	return &v
