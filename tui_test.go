@@ -126,7 +126,7 @@ func runTask(t *testing.T, m Model, cmd tea.Cmd) Model {
 func transcriptText(m Model) string {
 	var text strings.Builder
 	for _, e := range m.transcript {
-		text.WriteString(e.text + "\n")
+		text.WriteString(e.text);text.WriteString("\n")
 	}
 	return text.String()
 }
