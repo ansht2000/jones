@@ -111,6 +111,21 @@ vet:
 	@echo "  >  Checking code with vet"
 	@go vet ./...
 
+## bench: benchmark analyzing a repo at different concurrency levels with a simulated model
+bench:
+	@echo "  >  Running benchmarks"
+	@go test -run '^$$' -bench . -benchtime 5x ./internal/analysis/
+
+## test-live: run the tests that call the Gemini API, needs GEMINI_API_KEY
+test-live:
+	@echo "  >  Executing live tests"
+	@JONES_LIVE_TEST=1 go test -v -timeout 20m -run Live ./internal/...
+
+## eval: measure answer quality and speed with the Gemini API, needs GEMINI_API_KEY and makes a few hundred calls
+eval:
+	@echo "  >  Running evaluation"
+	@go run ./cmd/eval
+
 .PHONY: help
 all: help
 help: Makefile

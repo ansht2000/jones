@@ -560,7 +560,7 @@ func TestFormatFileList(t *testing.T) {
 		"logo.png: Binary file.\n" +
 		"main.go: Entry point that calls greet.Hello. (main)\n" +
 		"notes.md: " + strings.Repeat("word ", 24) + "... (A, B, C, D)\n"
-	if list := formatFileList(repo); list != expected {
+	if list := FormatFileList(repo); list != expected {
 		t.Errorf("Expected file list:\n%s\ngot:\n%s\n", expected, list)
 	}
 }

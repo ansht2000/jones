@@ -47,6 +47,19 @@ func TestCheckCitations(t *testing.T) {
 	}
 }
 
+func TestParseCitations(t *testing.T) {
+	repo_files := map[string]*analysis.FileAnalysis{"main.go": {}, "greet/hello.go": {}}
+	answer := "main calls Hello (main.go:6, hello.go:3-5), see src/app.go:2 and main.go:6 again, or src/app.go:9 and localhost:8080."
+
+	citations, unknown := ParseCitations(answer, repo_files)
+	if expected := []Citation{{"main.go", 6, 6}, {"greet/hello.go", 3, 5}}; !slices.Equal(citations, expected) {
+		t.Errorf("Expected citations %v, got %v\n", expected, citations)
+	}
+	if !slices.Equal(unknown, []string{"src/app.go"}) {
+		t.Errorf("Expected src/app.go to be the only unknown file, got %v\n", unknown)
+	}
+}
+
 func TestCitationString(t *testing.T) {
 	if s := (Citation{"main.go", 6, 6}).String(); s != "main.go:6" {
 		t.Errorf("Expected main.go:6, got %s\n", s)

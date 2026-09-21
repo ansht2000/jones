@@ -129,7 +129,7 @@ func Ask(ctx context.Context, client llm.Client, repo *analysis.Analysis, repo_p
 		question:   question,
 		repo_path:  repo_path,
 		repo:       repo,
-		file_list:  formatFileList(repo),
+		file_list:  FormatFileList(repo),
 		read_set:   map[string]*readFile{},
 		max_rounds: options.MaxReadRounds,
 	}

@@ -1,0 +1,149 @@
+{
+	"repos": [
+		{"name": "godotenv", "module": "github.com/joho/godotenv", "version": "v1.5.1"},
+		{"name": "x-time", "module": "golang.org/x/time", "version": "v0.6.0"},
+		{"name": "bubbletea", "module": "github.com/charmbracelet/bubbletea", "version": "v1.3.6"}
+	],
+	"questions": [
+		{
+			"repo": "godotenv",
+			"question": "Which function should I call instead of Load if the values in my .env file need to replace environment variables that are already set?",
+			"reference": "Overload. Load never overrides a variable that is already set in the environment, while Overload loads the same files but overrides existing variables. Both call loadFile, which only sets a key that isn't already in os.Environ() unless overload is true.",
+			"required": [["Overload"]],
+			"evidence": ["godotenv.go"]
+		},
+		{
+			"repo": "godotenv",
+			"question": "What file does Load read when it's called with no arguments?",
+			"reference": "It reads .env in the current working directory. filenamesOrDefault returns []string{\".env\"} when no filenames are given.",
+			"required": [[".env"]],
+			"evidence": ["godotenv.go"]
+		},
+		{
+			"repo": "godotenv",
+			"question": "Besides the equals sign, what separator between a variable's name and its value does the parser accept?",
+			"reference": "A colon. locateKeyName treats both '=' and ':' as the end of the key name, so YAML style `KEY: value` lines are accepted.",
+			"required": [["colon", "`:`", "':'", "\":\"", "yaml"]],
+			"evidence": ["parser.go"]
+		},
+		{
+			"repo": "godotenv",
+			"question": "When Marshal writes an environment out, how does it format values that are integers compared with other values, and in what order are the lines?",
+			"reference": "Values that parse as integers with strconv.Atoi are written without quotes, like KEY=123. Every other value is written as KEY=\"VALUE\", with special characters backslash escaped by doubleQuoteEscape. The lines are sorted before being joined with newlines.",
+			"required": [["unquoted", "without quotes", "no quotes", "not quoted", "without double quotes", "%d"], ["sort", "alphabetical"]],
+			"evidence": ["godotenv.go"]
+		},
+		{
+			"repo": "godotenv",
+			"question": "What happens when a program imports the autoload package?",
+			"reference": "The package's init function calls godotenv.Load(), so importing it for its side effects (import _ \"github.com/joho/godotenv/autoload\") loads .env when the program starts, without overriding variables that are already set.",
+			"required": [["init"], ["Load()", "godotenv.Load"]],
+			"evidence": ["autoload/autoload.go"]
+		},
+		{
+			"repo": "godotenv",
+			"question": "Inside a double-quoted value, which backslash escape sequences are turned into control characters?",
+			"reference": "\\n becomes a newline and \\r becomes a carriage return, in expandEscapes. Other backslash escaped characters, except a dollar sign, just have the backslash removed. Double-quoted values also have variables like ${VAR} expanded, which single-quoted values don't.",
+			"required": [["\\n", "newline", "new line"], ["\\r", "carriage return"]],
+			"evidence": ["parser.go"]
+		},
+		{
+			"repo": "x-time",
+			"question": "What algorithm does rate.Limiter use to decide whether an event may happen?",
+			"reference": "A token bucket. The bucket holds up to burst tokens, starts full, and refills at the limit's rate in tokens per second. Each event takes a token, or n tokens for AllowN, ReserveN, and WaitN.",
+			"required": [["token bucket", "token-bucket"]],
+			"evidence": ["rate/rate.go"]
+		},
+		{
+			"repo": "x-time",
+			"question": "What Limit does rate.Every return for an interval of zero or less?",
+			"reference": "Inf, the infinite rate limit that allows every event. For a positive interval it returns 1 divided by the interval in seconds.",
+			"required": [["Inf", "infinite", "unlimited"]],
+			"evidence": ["rate/rate.go"]
+		},
+		{
+			"repo": "x-time",
+			"question": "What does WaitN do when the context's deadline will pass before the tokens it needs become available?",
+			"reference": "It returns an error right away instead of waiting. It reserves the tokens with the time left before the deadline as the longest allowed wait, and when that reservation isn't OK it returns \"rate: Wait(n=N) would exceed context deadline\".",
+			"required": [["would exceed", "immediately", "right away", "without waiting", "without blocking", "doesn't wait", "does not wait"]],
+			"evidence": ["rate/rate.go"]
+		},
+		{
+			"repo": "x-time",
+			"question": "If the context is cancelled while Wait is sleeping until its tokens are ready, what happens to the tokens it reserved?",
+			"reference": "Wait cancels its reservation with r.Cancel(), which gives the reserved tokens back to the limiter as far as possible so other events can happen sooner, then returns ctx.Err().",
+			"required": [["r.Cancel", "Cancel()", "CancelAt", "cancels the reservation", "cancel the reservation", "cancelling the reservation", "canceling the reservation", "restore", "returned to the", "given back", "gives back", "put back", "puts back"]],
+			"evidence": ["rate/rate.go"]
+		},
+		{
+			"repo": "x-time",
+			"question": "Can WaitN wait for more tokens than the limiter's burst size?",
+			"reference": "No. When n is larger than the burst, WaitN returns an error (\"rate: Wait(n=N) exceeds limiter's burst B\") right away, unless the limit is Inf, in which case the burst is ignored.",
+			"required": [["error"], ["Inf", "infinite"]],
+			"evidence": ["rate/rate.go"]
+		},
+		{
+			"repo": "x-time",
+			"question": "When a Sometimes has more than one of First, Every, and Interval set, how are they combined to decide whether Do runs the function?",
+			"reference": "As a union, not an intersection: Do runs f if any of them allows it. The first call always runs f. After that, First: N runs the first N calls, Every: M runs every Mth call starting with the first, and Interval runs f once that much time has passed since it last ran.",
+			"required": [["union", "any of", "either"]],
+			"evidence": ["rate/sometimes.go"]
+		},
+		{
+			"repo": "bubbletea",
+			"question": "What is the difference between tea.Batch and tea.Sequence?",
+			"reference": "Batch runs its commands concurrently, with no guarantees about the order of their results, while Sequence runs its commands one at a time, in order.",
+			"required": [["concurren", "parallel", "at the same time", "simultaneous"], ["one at a time", "one after another", "in order", "sequential"]],
+			"evidence": ["commands.go"]
+		},
+		{
+			"repo": "bubbletea",
+			"question": "What error does Program.Run return after Program.Kill is called?",
+			"reference": "ErrProgramKilled. Kill stops the program right away without waiting for the event loop to finish, and Run returns ErrProgramKilled, possibly wrapping the error that caused it.",
+			"required": [["ErrProgramKilled"]],
+			"evidence": ["tea.go"]
+		},
+		{
+			"repo": "bubbletea",
+			"question": "What is the difference between tea.Tick and tea.Every?",
+			"reference": "Tick waits the full duration from when the command is created, while Every ticks in sync with the system clock: it waits until the clock reaches the next multiple of the duration, so the first tick can come sooner, like at 12:35:00 when ticking every minute from 12:34:20. Both send a single message, so they have to be returned again to keep ticking.",
+			"required": [["clock"]],
+			"evidence": ["commands.go"]
+		},
+		{
+			"repo": "bubbletea",
+			"question": "How does Bubble Tea run commands without blocking its event loop, and how do their results get back to Update?",
+			"reference": "handleCommands reads commands from a channel and runs each one in its own goroutine. When a command returns, its message is passed to Program.Send, which puts it on the program's message channel, and the event loop hands it to Update.",
+			"required": [["goroutine"], ["Send", "channel"]],
+			"evidence": ["tea.go"]
+		},
+		{
+			"repo": "bubbletea",
+			"question": "What happens when a command panics, and how can that behavior be turned off?",
+			"reference": "The goroutine running the command recovers the panic in recoverFromGoPanic, prints it with a stack trace, and cancels the program so the terminal is restored. Run then returns an error wrapping ErrProgramKilled and ErrProgramPanic. The WithoutCatchPanics program option turns panic catching off.",
+			"required": [["WithoutCatchPanics"], ["ErrProgramPanic", "restor", "stack trace"]],
+			"evidence": ["tea.go", "options.go"]
+		},
+		{
+			"repo": "bubbletea",
+			"question": "What frame rate does the standard renderer use by default, and what is the highest rate WithFPS allows?",
+			"reference": "60 frames per second by default and at most 120. WithFPS values below 1 fall back to 60, and values above 120 are capped at 120.",
+			"required": [["60"], ["120"]],
+			"evidence": ["standard_renderer.go", "options.go"]
+		},
+		{
+			"repo": "bubbletea",
+			"question": "On Unix, how does a Bubble Tea program find out that the terminal window was resized?",
+			"reference": "listenForResize in signals_unix.go listens for the SIGWINCH signal. Each time it arrives it calls checkResize, which reads the terminal's size and sends the program a WindowSizeMsg. The size at startup is sent the same way.",
+			"required": [["SIGWINCH"], ["WindowSizeMsg"]],
+			"evidence": ["signals_unix.go", "tty.go"]
+		},
+		{
+			"repo": "bubbletea",
+			"question": "When LogToFile opens the log file, does it overwrite existing logs, and what permissions does it create the file with?",
+			"reference": "It appends: the file is opened with O_WRONLY|O_CREATE|O_APPEND, so existing logs are kept, and a new file is created with permissions 0600. It then points the logger at the file and sets the prefix, adding a space after it if there isn't one.",
+			"required": [["append"], ["600"]],
+			"evidence": ["logging.go"]
+		}
+	]
+}

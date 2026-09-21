@@ -18,7 +18,7 @@ const (
 // One line per file and directory in the repo, sorted by path, with the
 // start of its summary. Files also list their key symbols, which helps the
 // model find where something is defined.
-func formatFileList(repo *analysis.Analysis) string {
+func FormatFileList(repo *analysis.Analysis) string {
 	paths := make([]string, 0, len(repo.Files)+len(repo.Dirs))
 	for dir_path := range repo.Dirs {
 		paths = append(paths, dir_path)
